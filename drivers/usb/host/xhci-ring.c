@@ -1290,7 +1290,6 @@ static void handle_port_status(struct xhci_hcd *xhci,
 		xhci->error_bitmask |= 1 << 8;
 	}
 	port_id = GET_PORT_ID(le32_to_cpu(event->generic.field[0]));
-	xhci_dbg(xhci, "Port Status Change Event for port %d\n", port_id);
 
 	max_ports = HCS_MAX_PORTS(xhci->hcs_params1);
 	if ((port_id <= 0) || (port_id > max_ports)) {
@@ -1339,6 +1338,8 @@ static void handle_port_status(struct xhci_hcd *xhci,
 			port_id);
 
 	temp = xhci_readl(xhci, port_array[faked_port_index]);
+	xhci_dbg(xhci, "Port Status Change Event for port %d, PORTSC 0x%x\n",
+			port_id, temp);
 	if (hcd->state == HC_STATE_SUSPENDED) {
 		xhci_dbg(xhci, "resume root hub\n");
 		usb_hcd_resume_root_hub(hcd);
