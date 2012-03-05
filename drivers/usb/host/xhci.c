@@ -526,14 +526,14 @@ int xhci_run(struct usb_hcd *hcd)
 #endif
 
 	xhci_dbg(xhci, "Command ring memory map follows:\n");
-	xhci_debug_ring(xhci, xhci->cmd_ring);
+	xhci_debug_ring(xhci, xhci->cmd_ring, 0);
 	xhci_dbg_ring_ptrs(xhci, xhci->cmd_ring);
 	xhci_dbg_cmd_ptrs(xhci);
 
 	xhci_dbg(xhci, "ERST memory map follows:\n");
 	xhci_dbg_erst(xhci, &xhci->erst);
 	xhci_dbg(xhci, "Event ring:\n");
-	xhci_debug_ring(xhci, xhci->event_ring);
+	xhci_debug_ring(xhci, xhci->event_ring, 0);
 	xhci_dbg_ring_ptrs(xhci, xhci->event_ring);
 	temp_64 = xhci_read_64(xhci, &xhci->ir_set->erst_dequeue);
 	temp_64 &= ~ERST_PTR_MASK;

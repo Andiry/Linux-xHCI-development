@@ -326,6 +326,24 @@ void xhci_debug_segment(struct xhci_hcd *xhci, struct xhci_segment *seg)
 	}
 }
 
+/* The xhci_warn() version of xhci_debug_segment() */
+void xhci_warn_segment(struct xhci_hcd *xhci, struct xhci_segment *seg)
+{
+	int i;
+	u64 addr = seg->dma;
+	union xhci_trb *trb = seg->trbs;
+
+	for (i = 0; i < TRBS_PER_SEGMENT; ++i) {
+		trb = &seg->trbs[i];
+		xhci_warn(xhci, "@%016llx %08x %08x %08x %08x\n", addr,
+			 lower_32_bits(le64_to_cpu(trb->link.segment_ptr)),
+			 upper_32_bits(le64_to_cpu(trb->link.segment_ptr)),
+			 le32_to_cpu(trb->link.intr_target),
+			 le32_to_cpu(trb->link.control));
+		addr += sizeof(*trb);
+	}
+}
+
 void xhci_dbg_ring_ptrs(struct xhci_hcd *xhci, struct xhci_ring *ring)
 {
 	xhci_dbg(xhci, "Ring deq = %p (virt), 0x%llx (dma)\n",
@@ -351,19 +369,26 @@ void xhci_dbg_ring_ptrs(struct xhci_hcd *xhci, struct xhci_ring *ring)
  * Check that the dequeue and enqueue pointers point to real data in this ring
  * (not some other ring).
  */
-void xhci_debug_ring(struct xhci_hcd *xhci, struct xhci_ring *ring)
+void xhci_debug_ring(struct xhci_hcd *xhci, struct xhci_ring *ring, int level)
 {
 	/* FIXME: Throw an error if any segment doesn't have a Link TRB */
 	struct xhci_segment *seg;
 	struct xhci_segment *first_seg = ring->first_seg;
-	xhci_debug_segment(xhci, first_seg);
+	if (level)
+		xhci_warn_segment(xhci, first_seg);
+	else
+		xhci_debug_segment(xhci, first_seg);
 
 	if (!ring->enq_updates && !ring->deq_updates) {
 		xhci_dbg(xhci, "  Ring has not been updated\n");
 		return;
 	}
-	for (seg = first_seg->next; seg != first_seg; seg = seg->next)
-		xhci_debug_segment(xhci, seg);
+	for (seg = first_seg->next; seg != first_seg; seg = seg->next) {
+		if (level)
+			xhci_warn_segment(xhci, seg);
+		else
+			xhci_debug_segment(xhci, seg);
+	}
 }
 
 void xhci_dbg_ep_rings(struct xhci_hcd *xhci,
