@@ -3537,6 +3537,10 @@ static int queue_command(struct xhci_hcd *xhci, u32 field1, u32 field2,
 			reserved_trbs, GFP_ATOMIC);
 	if (ret < 0) {
 		xhci_err(xhci, "ERR: No room for command on command ring\n");
+		xhci_warn(xhci, "Command Ring:\n");
+		xhci_debug_ring(xhci, xhci->cmd_ring, 1);
+		xhci_warn(xhci, "Event Ring:\n");
+		xhci_debug_ring(xhci, xhci->event_ring, 1);
 		if (command_must_succeed)
 			xhci_err(xhci, "ERR: Reserved TRB counting for "
 					"unfailable commands failed.\n");
