@@ -2195,6 +2195,10 @@ static int handle_tx_event(struct xhci_hcd *xhci,
 				xhci_err(xhci,
 					"ERROR Transfer event TRB DMA ptr not "
 					"part of current TD\n");
+				xhci_warn(xhci, "Event Ring:\n");
+				xhci_debug_ring(xhci, xhci->event_ring, 1);
+				xhci_warn(xhci, "EP Ring:\n");
+				xhci_debug_ring(xhci, ep_ring, 1);
 				return -ESHUTDOWN;
 			}
 
