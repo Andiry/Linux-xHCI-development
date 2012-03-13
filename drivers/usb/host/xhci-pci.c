@@ -190,6 +190,16 @@ static void xhci_pci_remove(struct pci_dev *dev)
 }
 
 #ifdef CONFIG_PM
+static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
+{
+	int i;
+
+	if (xhci->msix_entries) {
+		for (i = 0; i < xhci->msix_count; i++)
+			synchronize_irq(xhci->msix_entries[i].vector);
+	}
+}
+
 static int xhci_pci_suspend(struct usb_hcd *hcd, bool do_wakeup)
 {
 	struct xhci_hcd	*xhci = hcd_to_xhci(hcd);
@@ -200,6 +210,10 @@ static int xhci_pci_suspend(struct usb_hcd *hcd, bool do_wakeup)
 		return -EINVAL;
 
 	retval = xhci_suspend(xhci);
+
+	/* synchronize irq when using MSI-X */
+	if (!retval)
+		xhci_msix_sync_irqs(xhci);
 
 	return retval;
 }

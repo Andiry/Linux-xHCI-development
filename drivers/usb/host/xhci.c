@@ -315,16 +315,6 @@ static void xhci_cleanup_msix(struct xhci_hcd *xhci)
 	return;
 }
 
-static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
-{
-	int i;
-
-	if (xhci->msix_entries) {
-		for (i = 0; i < xhci->msix_count; i++)
-			synchronize_irq(xhci->msix_entries[i].vector);
-	}
-}
-
 static int xhci_try_enable_msi(struct usb_hcd *hcd)
 {
 	struct xhci_hcd *xhci = hcd_to_xhci(hcd);
@@ -377,10 +367,6 @@ static int xhci_try_enable_msi(struct usb_hcd *hcd)
 }
 
 static void xhci_cleanup_msix(struct xhci_hcd *xhci)
-{
-}
-
-static void xhci_msix_sync_irqs(struct xhci_hcd *xhci)
 {
 }
 
@@ -791,9 +777,6 @@ int xhci_suspend(struct xhci_hcd *xhci)
 	spin_unlock_irq(&xhci->lock);
 
 	/* step 5: remove core well power */
-	/* synchronize irq when using MSI-X */
-	xhci_msix_sync_irqs(xhci);
-
 	return rc;
 }
 
